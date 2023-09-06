@@ -12,23 +12,23 @@ public class Reservation {
     @GeneratedValue (strategy = GenerationType.AUTO)
     private int id;
 
-    private int user_id; // user qui ont dejà réservés
-    private int vehicule_id; // véhicules déjà réservés
-    private Date starting_date;
-    private Date ending_date;
-    private int estimate_distance;
+    private int userId; // user qui ont dejà réservés
+    private int vehiculeId; // véhicules déjà réservés
+    private Date startingDate;
+    private Date endingDate;
+    private int estimatedDistance;
 
     public Reservation() {
 
     }
 
-    public Reservation(int id, int user_id, int vehicule_id, Date starting_date, Date ending_date, int estimate_distance) {
+    public Reservation(int id, int userId, int vehiculeId, Date startingDate, Date endingDate, int estimatedDistance) {
         this.id = id;
-        this.user_id = user_id;
-        this.vehicule_id = vehicule_id;
-        this.starting_date = starting_date;
-        this.ending_date = ending_date;
-        this.estimate_distance = estimate_distance;
+        this.userId = userId;
+        this.vehiculeId = vehiculeId;
+        this.startingDate = startingDate;
+        this.endingDate = endingDate;
+        this.estimatedDistance = estimatedDistance;
     }
 
     public int getId() {
@@ -39,55 +39,55 @@ public class Reservation {
         this.id = id;
     }
 
-    public int getUser_id() {
-        return user_id;
+    public int getUserId() {
+        return userId;
     }
 
-    public void setUser_id(int user_id) {
-        this.user_id = user_id;
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
-    public int getVehicule_id() {
-        return vehicule_id;
+    public int getVehiculeId() {
+        return vehiculeId;
     }
 
-    public void setVehicule_id(int vehicule_id) {
-        this.vehicule_id = vehicule_id;
+    public void setVehiculeId(int vehiculeId) {
+        this.vehiculeId = vehiculeId;
     }
 
-    public Date getStarting_date() {
-        return starting_date;
+    public Date getStartingDate() {
+        return startingDate;
     }
 
-    public void setStarting_date(Date starting_date) {
-        this.starting_date = starting_date;
+    public void setStartingDate(Date startingDate) {
+        this.startingDate = startingDate;
     }
 
-    public Date getEnding_date() {
-        return ending_date;
+    public Date getEndingDate() {
+        return endingDate;
     }
 
-    public void setEnding_date(Date ending_date) {
-        this.ending_date = ending_date;
+    public void setEndingDate(Date endingDate) {
+        this.endingDate = endingDate;
     }
 
-    public int getEstimate_distance() {
-        return estimate_distance;
+    public int getEstimatedDistance() {
+        return estimatedDistance;
     }
 
-    public void setEstimate_distance(int estimate_distance) {
-        this.estimate_distance = estimate_distance;
+    public void setEstimatedDistance(int estimatedDistance) {
+        this.estimatedDistance = estimatedDistance;
     }
 
     @Override
     public String toString() {
         return "Reservation{" +
                 "id=" + id +
-                ", user_id=" + user_id +
-                ", vehicule_id=" + vehicule_id +
-                ", starting_date=" + starting_date +
-                ", ending_date=" + ending_date +
-                ", estimate_distance=" + estimate_distance +
+                ", userId=" + userId +
+                ", vehiculeId=" + vehiculeId +
+                ", startingDate=" + startingDate +
+                ", endingDate=" + endingDate +
+                ", estimatedDistance=" + estimatedDistance +
                 '}';
     }
 }
