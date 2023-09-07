@@ -1,5 +1,6 @@
 package com.reservation.microservicesreservation.web.controller;
 
+import com.reservation.microservicesreservation.DTO.VehiculesDTO;
 import com.reservation.microservicesreservation.model.Reservation;
 import com.reservation.microservicesreservation.model.Vehicule;
 import com.reservation.microservicesreservation.repository.ReservationRepository;
@@ -21,14 +22,11 @@ import java.util.List;
 @RequestMapping("/reservations")
 @RestController
 public class ReservationController {
-
     RestTemplate restTemplate = new RestTemplate();
 
     @Autowired
-
     private ReservationRepository reservationRepository;
-
-    private final String uriAPIVehicules = "http://192.168.1.238:9092/vehicules";
+    private final String uriAPIVehicules = "http://localhost:9092/vehicules";
 
     public ReservationController(ReservationRepository reservationRepository) {
         this.reservationRepository = reservationRepository;
@@ -60,40 +58,58 @@ public class ReservationController {
         return reservationRepository.deleteById(id);
     }
 
-    @GetMapping("/available-vehicules/{userReservationStartingDate}/{userReservationEndingDate}")
-    public List<Vehicule> getAvailableVehicules (@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date userReservationStartingDate, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date userReservationEndingDate) throws URISyntaxException {
+    @GetMapping("/available-vehicules/{userReservationStartingDate}/{userReservationEndingDate}/{estimatedMileage}")
+    public List<Vehicule> getAvailableVehicules (@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date userReservationStartingDate,
+                                                 @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date userReservationEndingDate,
+                                                 @PathVariable int estimatedMileage)
+            throws URISyntaxException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-
         URI uri = new URI(uriAPIVehicules + "/available");
+        // Méthode pour récupérer la liste des ids de véhicules occupés aux dates (date début, date de fin)
         List<Integer> reservedVehiculeIds = reservationRepository.getVehiculeIds(userReservationStartingDate, userReservationEndingDate);
-
-
+        // Liste de "vehiculesIds" occupés à envoyer à microservice Vehicules
         HttpEntity<List> httpEntity = new HttpEntity<>(reservedVehiculeIds, headers);
-
+        // Réponse attendue de l'API microservices vehicules : Post (pour api à l'adresse "uri", objet envoyé pour comparairson (corps de requête), type de retour attendu)
+        // On récupère une liste de véhicules disponibles
         List<Vehicule> availableVehicules = restTemplate.postForObject(uri, httpEntity, List.class);
-
         return availableVehicules;
     }
 
-/*    public Date getReservationDate(Date reservationStartingDate, Date reservationEndingDate) {
-        return reservationRepository.
-    }*/
-
-/*    public void sendVehiculeIdToVehicules (@RequestBody int vehicule_id) throws URISyntaxException {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        URI uri = new URI(urlAPIVehicules + "/available");
-        ArrayList<Integer> vehiculesIds = reservationRepository.findById(vehicule_id);
-        for (Vehicule vehicule : vehiculesIds) {
-
+    public double calculateTotalPrice(Vehicule vehicule, int estimatedMileage) {
+        double totalPrice;
+        if (vehicule.getType().equals("car")){
+            totalPrice = calculateStartingPrice(vehicule) + calculateTotalMileagePrice(vehicule, estimatedMileage);
+        } else if (vehicule.getType().equals("moto")) {
+            totalPrice = calculateStartingPrice(vehicule) + calculateTotalMileagePrice(vehicule, estimatedMileage) * (vehicule.getDisplacement() * 0.001);
+        } else {
+            totalPrice = calculateStartingPrice(vehicule) + calculateTotalMileagePrice(vehicule, estimatedMileage) * (vehicule.getVolumeCapacity() * 0.05);
         }
+        return totalPrice;
+    }
+    public double calculateStartingPrice(Vehicule vehicule) {
+        return vehicule.getCleaningCost() + vehicule.getApplicationFee();
+    }
+    public double calculateTotalMileagePrice(Vehicule vehicule, int estimatedMileage) {
+        return vehicule.getMileagePrice() * estimatedMileage;
+    }
 
-    }*/
+    public List<VehiculesDTO> convertToDto (List<Vehicule> vehicules, int estimatedMileage) {
+        List<VehiculesDTO> vehiculesDTO = new ArrayList<>();
+        for (Vehicule vehicule: vehicules) {
+            VehiculesDTO vehiculesToDisplay = new VehiculesDTO();
+            vehiculesToDisplay.setType(vehicule.getType());
+            vehiculesToDisplay.setBrand(vehicule.getBrand());
+            vehiculesToDisplay.setModel(vehicule.getModel());
+            vehiculesToDisplay.setColor(vehicule.getModel());
+            vehiculesToDisplay.setDisplacement(vehicule.getDisplacement());
+            vehiculesToDisplay.setVolumeCapacity(vehicule.getVolumeCapacity());
+            vehiculesToDisplay.setHorsepowerTax(vehicule.getHorsepowerTax());
+            vehiculesToDisplay.setMileagePrice(vehicule.getMileagePrice());
+            vehiculesToDisplay.setTotalPrice(calculateTotalPrice(vehicule, estimatedMileage));
+            vehiculesDTO.add(vehiculesToDisplay);
+        }
+        return vehiculesDTO;
+    }
 
-/*    public ArrayList<Vehicule> getAllVehicules() {
-        Vehicule vehicule = restTemplate.getForObject(urlAPIVehicules + Vehicule.class);
-
-    }*/
 }
