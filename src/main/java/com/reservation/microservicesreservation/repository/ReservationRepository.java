@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Integer> {
     ArrayList<Reservation> findAll();
@@ -14,7 +15,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
 
     Reservation deleteById(int id);
 
-    @Query(value = "SELECT vehiculeId FROM Reservation")
-    ArrayList<Integer> getVehiculeIds();
+    @Query(value = "SELECT r.vehiculeId FROM Reservation r " +
+            "WHERE r.startingDate BETWEEN (:userReservationStartingDate) AND (:userReservationEndingDate) " +
+            "OR r.endingDate BETWEEN (:userReservationStartingDate) AND (:userReservationEndingDate) " +
+            "OR r.startingDate < (:userReservationStartingDate) AND r.endingDate > (:userReservationEndingDate)")
+    ArrayList<Integer> getVehiculeIds(Date userReservationStartingDate, Date userReservationEndingDate);
 
 }

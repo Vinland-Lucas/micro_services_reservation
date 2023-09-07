@@ -4,6 +4,8 @@ import com.reservation.microservicesreservation.model.Reservation;
 import com.reservation.microservicesreservation.model.Vehicule;
 import com.reservation.microservicesreservation.repository.ReservationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -11,8 +13,9 @@ import org.springframework.web.client.RestTemplate;
 import java.lang.reflect.Array;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.http.HttpHeaders;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @RequestMapping("/reservations")
 @RestController
@@ -24,7 +27,7 @@ public class ReservationController {
 
     private ReservationRepository reservationRepository;
 
-    private final String urlAPIVehicules = "http://localhost:9092/vehicules/";
+    private final String uriAPIVehicules = "http://localhost:9092/vehicules";
 
     public ReservationController(ReservationRepository reservationRepository) {
         this.reservationRepository = reservationRepository;
@@ -45,20 +48,36 @@ public class ReservationController {
         return reservationRepository.save(reservation);
     }
 
-    @PutMapping("{id}")
+    @PutMapping("/{id}")
     public Reservation modifyReservation(@PathVariable int id, @RequestBody Reservation reservation) {
         reservation.setId(id);
         return reservationRepository.save(reservation);
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public Reservation deleteReservation(@PathVariable int id) {
         return reservationRepository.deleteById(id);
     }
 
-    public ArrayList<Integer> getReservedVehiculeIds () {
-        return reservationRepository.getVehiculeIds();
+    @GetMapping("/available-vehicules/{userReservationStartingDate}/{userReservationEndingDate}")
+    public List<Vehicule> getAvailableVehicules (@PathVariable Date userReservationStartingDate, @PathVariable Date userReservationEndingDate) throws URISyntaxException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        URI uri = new URI(uriAPIVehicules + "/available");
+        List<Integer> reservedVehiculeIds = reservationRepository.getVehiculeIds(userReservationStartingDate, userReservationEndingDate);
+
+
+        HttpEntity<List> httpEntity = new HttpEntity<>(reservedVehiculeIds, headers);
+
+        List<Vehicule> availableVehicules = restTemplate.postForObject(uri, httpEntity, List.class);
+
+        return availableVehicules;
     }
+
+/*    public Date getReservationDate(Date reservationStartingDate, Date reservationEndingDate) {
+        return reservationRepository.
+    }*/
 
 /*    public void sendVehiculeIdToVehicules (@RequestBody int vehicule_id) throws URISyntaxException {
         HttpHeaders headers = new HttpHeaders();
