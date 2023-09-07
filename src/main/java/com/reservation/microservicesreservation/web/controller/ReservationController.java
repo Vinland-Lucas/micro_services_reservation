@@ -28,7 +28,7 @@ public class ReservationController {
 
     private ReservationRepository reservationRepository;
 
-    private final String uriAPIVehicules = "http://localhost:9092/vehicules";
+    private final String uriAPIVehicules = "http://192.168.1.238:9092/vehicules";
 
     public ReservationController(ReservationRepository reservationRepository) {
         this.reservationRepository = reservationRepository;
@@ -45,7 +45,7 @@ public class ReservationController {
     }
 
     @PostMapping
-    public Reservation addReservation(@RequestBody Reservation reservation) {
+    public @ResponseBody Reservation addReservation(@RequestBody Reservation reservation) {
         return reservationRepository.save(reservation);
     }
 
