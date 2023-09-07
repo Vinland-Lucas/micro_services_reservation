@@ -4,6 +4,7 @@ import com.reservation.microservicesreservation.model.Reservation;
 import com.reservation.microservicesreservation.model.Vehicule;
 import com.reservation.microservicesreservation.repository.ReservationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -60,7 +61,7 @@ public class ReservationController {
     }
 
     @GetMapping("/available-vehicules/{userReservationStartingDate}/{userReservationEndingDate}")
-    public List<Vehicule> getAvailableVehicules (@PathVariable Date userReservationStartingDate, @PathVariable Date userReservationEndingDate) throws URISyntaxException {
+    public List<Vehicule> getAvailableVehicules (@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date userReservationStartingDate, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date userReservationEndingDate) throws URISyntaxException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 

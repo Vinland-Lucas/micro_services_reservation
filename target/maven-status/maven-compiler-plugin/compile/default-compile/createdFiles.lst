@@ -1,2 +1,5 @@
+com/reservation/microservicesreservation/repository/ReservationRepository.class
+com/reservation/microservicesreservation/web/controller/ReservationController.class
 com/reservation/microservicesreservation/model/Reservation.class
 com/reservation/microservicesreservation/MicroservicesreservationApplication.class
+com/reservation/microservicesreservation/model/Vehicule.class
