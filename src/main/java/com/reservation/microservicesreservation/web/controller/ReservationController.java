@@ -1,6 +1,7 @@
 package com.reservation.microservicesreservation.web.controller;
 
 import com.reservation.microservicesreservation.DTO.VehiculesDTO;
+import com.reservation.microservicesreservation.model.Customer;
 import com.reservation.microservicesreservation.model.Reservation;
 import com.reservation.microservicesreservation.model.Vehicule;
 import com.reservation.microservicesreservation.repository.ReservationRepository;
@@ -8,13 +9,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.lang.reflect.Array;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -28,6 +33,7 @@ public class ReservationController {
     @Autowired
     private ReservationRepository reservationRepository;
     private final String uriAPIVehicules = "http://localhost:9092/vehicules";
+    private final String uriAPICustomers = "http://192.168.1.230:9090/customers";
 
     public ReservationController(ReservationRepository reservationRepository) {
         this.reservationRepository = reservationRepository;
@@ -45,12 +51,21 @@ public class ReservationController {
 
     @PostMapping
     public @ResponseBody Reservation addReservation(@RequestBody Reservation reservation) {
-        return reservationRepository.save(reservation);
+        int userId = reservation.getUserId();
+        int vehiculeId = reservation.getVehiculeId();
+        if (checkAgeVsHptax(userId, vehiculeId)) {
+            // Http Status 200 OK ?
+            return reservationRepository.save(reservation);
+        } else {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Véhicule non autorisé : vous êtes trop jeune !"
+            ); // httpresponse 400 badrequest
+        }
     }
 
     @PutMapping("/{id}")
     public Reservation modifyReservation(@PathVariable int id, @RequestBody Reservation reservation) {
-        reservation.setId(id);
+        reservation.setUserId(id); // récupérer l'Id du client
         return reservationRepository.save(reservation);
     }
 
@@ -99,6 +114,7 @@ public class ReservationController {
         List<VehiculesDTO> vehiculesDTO = new ArrayList<>();
         for (Vehicule vehicule: vehicules) {
             VehiculesDTO vehiculeToDisplay = new VehiculesDTO();
+            vehiculeToDisplay.setId(vehicule.getId());
             vehiculeToDisplay.setType(vehicule.getType());
             vehiculeToDisplay.setBrand(vehicule.getBrand());
             vehiculeToDisplay.setModel(vehicule.getModel());
@@ -112,5 +128,23 @@ public class ReservationController {
         }
         return vehiculesDTO;
     }
-
+    public boolean checkAgeVsHptax(int userId, int vehiculeId) {
+        Vehicule vehiculeChosen = restTemplate.getForObject(uriAPIVehicules + "/" + vehiculeId, Vehicule.class);
+        Customer customer = restTemplate.getForObject(uriAPICustomers + "/" + userId, Customer.class);
+        Date currentDate = new Date();
+        DateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+        int date1 = Integer.parseInt(formatter.format(customer.getBirthDate()));
+        int date2 = Integer.parseInt(formatter.format(currentDate));
+        int age = (date2 - date1) / 10000;
+        // si âge < 21 => vehicule avec hptaxes < 8
+        // si âge < 25 => vehicule avec hptaxes < 13
+        // sinon => tous les véhicules ok
+        if ((age < 21 && vehiculeChosen.getHorsepowerTax() < 8)
+                || (age <= 25 && vehiculeChosen.getHorsepowerTax() < 13)
+                || age > 25) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

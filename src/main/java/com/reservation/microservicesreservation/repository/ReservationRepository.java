@@ -17,8 +17,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
     @Query(value = "SELECT r.vehiculeId FROM Reservation r " +
             "WHERE r.startingDate BETWEEN (:userReservationStartingDate) AND (:userReservationEndingDate) " +
             "OR r.endingDate BETWEEN (:userReservationStartingDate) AND (:userReservationEndingDate) " +
-            "OR r.startingDate < (:userReservationStartingDate) AND r.endingDate > (:userReservationEndingDate)"
-    )
+            "OR r.startingDate < (:userReservationStartingDate) AND r.endingDate > (:userReservationEndingDate)")
     List<Integer> getVehiculeIds(Date userReservationStartingDate, Date userReservationEndingDate);
 
 }

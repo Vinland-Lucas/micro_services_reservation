@@ -1,6 +1,7 @@
 package com.reservation.microservicesreservation.DTO;
 
 public class VehiculesDTO {
+    private int id;
     private String type;
     private String brand;
     private String model;
@@ -10,6 +11,14 @@ public class VehiculesDTO {
     private int horsepowerTax;
     private int mileagePrice;
     private double totalPrice;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getType() {
         return type;
@@ -86,7 +95,8 @@ public class VehiculesDTO {
     @Override
     public String toString() {
         return "VehiculesDTO{" +
-                "type='" + type + '\'' +
+                "id=" + id +
+                ", type='" + type + '\'' +
                 ", brand='" + brand + '\'' +
                 ", model='" + model + '\'' +
                 ", color='" + color + '\'' +
