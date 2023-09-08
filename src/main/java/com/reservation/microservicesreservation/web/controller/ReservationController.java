@@ -1,5 +1,6 @@
 package com.reservation.microservicesreservation.web.controller;
 
+import com.reservation.microservicesreservation.DTO.ReservationDTO;
 import com.reservation.microservicesreservation.DTO.VehiculesDTO;
 import com.reservation.microservicesreservation.model.Customer;
 import com.reservation.microservicesreservation.model.Reservation;
@@ -45,8 +46,42 @@ public class ReservationController {
     }
 
     @GetMapping("/{id}")
-    public Reservation displayReservationById(@PathVariable int id) {
-        return reservationRepository.findById(id);
+    public ReservationDTO displayReservationById(@PathVariable int id) {
+        Reservation reservation = reservationRepository.findById(id);
+        // Ajouter DTO réseumé de réservation : infos client + infos véhicule
+        int userId = reservation.getUserId();
+        Customer customer = restTemplate.getForObject(uriAPICustomers + "/" + userId, Customer.class);
+        int vehiculeId = reservation.getVehiculeId();
+        Vehicule vehicule = restTemplate.getForObject(uriAPIVehicules + "/" + vehiculeId, Vehicule.class);
+        ReservationDTO reservationDTO = new ReservationDTO();
+        reservationDTO.setId(reservation.getId());
+        reservationDTO.setStartingDate(reservation.getStartingDate());
+        reservationDTO.setEndingDate(reservation.getEndingDate());
+        reservationDTO.setEstimatedDistance(reservation.getEstimatedDistance());
+        reservationDTO.setUserId(reservation.getUserId());
+        reservationDTO.setLastName(customer.getLastName());
+        reservationDTO.setFirstName(customer.getFirstName());
+        reservationDTO.setBirthDate(customer.getBirthDate());
+        reservationDTO.setEmail(customer.getEmail());
+        reservationDTO.setLicenceNumber(customer.getLicenceNumber());
+        reservationDTO.setLicenceDate(customer.getLicenceDate());
+        reservationDTO.setVehiculeId(reservation.getVehiculeId());
+        reservationDTO.setRegistration(vehicule.getRegistration());
+        reservationDTO.setType(vehicule.getType());
+        reservationDTO.setBrand(vehicule.getBrand());
+        reservationDTO.setModel(vehicule.getModel());
+        reservationDTO.setColor(vehicule.getColor());
+        reservationDTO.setDisplacement(vehicule.getDisplacement());
+        reservationDTO.setVolumeCapacity(vehicule.getVolumeCapacity());
+        reservationDTO.setHorsepowerTax(vehicule.getHorsepowerTax());
+        reservationDTO.setMileagePrice(vehicule.getMileagePrice());
+        reservationDTO.setApplicationFee(vehicule.getApplicationFee());
+        reservationDTO.setCleaningCost(vehicule.getCleaningCost());
+        reservationDTO.setMileage(vehicule.getMileage());
+
+        return reservationDTO;
+
+//        return reservationRepository.findById(id);
     }
 
     @PostMapping
