@@ -16,6 +16,7 @@ import java.lang.reflect.Array;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -59,7 +60,7 @@ public class ReservationController {
     }
 
     @GetMapping("/available-vehicules/{userReservationStartingDate}/{userReservationEndingDate}/{estimatedMileage}")
-    public List<Vehicule> getAvailableVehicules (@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date userReservationStartingDate,
+    public List<VehiculesDTO> getAvailableVehicules(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date userReservationStartingDate,
                                                  @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date userReservationEndingDate,
                                                  @PathVariable int estimatedMileage)
             throws URISyntaxException {
@@ -72,8 +73,9 @@ public class ReservationController {
         HttpEntity<List> httpEntity = new HttpEntity<>(reservedVehiculeIds, headers);
         // Réponse attendue de l'API microservices vehicules : Post (pour api à l'adresse "uri", objet envoyé pour comparairson (corps de requête), type de retour attendu)
         // On récupère une liste de véhicules disponibles
-        List<Vehicule> availableVehicules = restTemplate.postForObject(uri, httpEntity, List.class);
-        return availableVehicules;
+        List<Vehicule> availableVehicules = Arrays.asList(restTemplate.postForObject(uri, httpEntity, Vehicule[].class));
+
+        return convertToDto(availableVehicules, estimatedMileage);
     }
 
     public double calculateTotalPrice(Vehicule vehicule, int estimatedMileage) {
@@ -93,21 +95,20 @@ public class ReservationController {
     public double calculateTotalMileagePrice(Vehicule vehicule, int estimatedMileage) {
         return vehicule.getMileagePrice() * estimatedMileage;
     }
-
-    public List<VehiculesDTO> convertToDto (List<Vehicule> vehicules, int estimatedMileage) {
+    public List<VehiculesDTO> convertToDto(List<Vehicule> vehicules, int estimatedMileage) {
         List<VehiculesDTO> vehiculesDTO = new ArrayList<>();
         for (Vehicule vehicule: vehicules) {
-            VehiculesDTO vehiculesToDisplay = new VehiculesDTO();
-            vehiculesToDisplay.setType(vehicule.getType());
-            vehiculesToDisplay.setBrand(vehicule.getBrand());
-            vehiculesToDisplay.setModel(vehicule.getModel());
-            vehiculesToDisplay.setColor(vehicule.getModel());
-            vehiculesToDisplay.setDisplacement(vehicule.getDisplacement());
-            vehiculesToDisplay.setVolumeCapacity(vehicule.getVolumeCapacity());
-            vehiculesToDisplay.setHorsepowerTax(vehicule.getHorsepowerTax());
-            vehiculesToDisplay.setMileagePrice(vehicule.getMileagePrice());
-            vehiculesToDisplay.setTotalPrice(calculateTotalPrice(vehicule, estimatedMileage));
-            vehiculesDTO.add(vehiculesToDisplay);
+            VehiculesDTO vehiculeToDisplay = new VehiculesDTO();
+            vehiculeToDisplay.setType(vehicule.getType());
+            vehiculeToDisplay.setBrand(vehicule.getBrand());
+            vehiculeToDisplay.setModel(vehicule.getModel());
+            vehiculeToDisplay.setColor(vehicule.getModel());
+            vehiculeToDisplay.setDisplacement(vehicule.getDisplacement());
+            vehiculeToDisplay.setVolumeCapacity(vehicule.getVolumeCapacity());
+            vehiculeToDisplay.setHorsepowerTax(vehicule.getHorsepowerTax());
+            vehiculeToDisplay.setMileagePrice(vehicule.getMileagePrice());
+            vehiculeToDisplay.setTotalPrice(calculateTotalPrice(vehicule, estimatedMileage));
+            vehiculesDTO.add(vehiculeToDisplay);
         }
         return vehiculesDTO;
     }
