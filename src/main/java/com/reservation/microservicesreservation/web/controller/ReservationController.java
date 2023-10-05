@@ -27,6 +27,7 @@ import java.util.Date;
 import java.util.List;
 
 @RequestMapping("/reservations")
+@CrossOrigin
 @RestController
 public class ReservationController {
     RestTemplate restTemplate = new RestTemplate();
