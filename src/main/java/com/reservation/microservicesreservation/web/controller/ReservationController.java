@@ -6,6 +6,7 @@ import com.reservation.microservicesreservation.model.Customer;
 import com.reservation.microservicesreservation.model.Reservation;
 import com.reservation.microservicesreservation.model.Vehicule;
 import com.reservation.microservicesreservation.repository.ReservationRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpEntity;
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.lang.reflect.Array;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.DateFormat;
@@ -26,8 +26,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-@RequestMapping("/reservations")
+
 @CrossOrigin
+@RequestMapping("/reservations")
 @RestController
 public class ReservationController {
     RestTemplate restTemplate = new RestTemplate();
@@ -111,9 +112,10 @@ public class ReservationController {
     }
 
     @GetMapping("/available-vehicules/{userReservationStartingDate}/{userReservationEndingDate}/{estimatedMileage}")
-    public List<VehiculesDTO> getAvailableVehicules(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date userReservationStartingDate,
-                                                 @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date userReservationEndingDate,
-                                                 @PathVariable int estimatedMileage)
+    public List<VehiculesDTO> getAvailableVehicules(
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date userReservationStartingDate,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date userReservationEndingDate,
+            @PathVariable int estimatedMileage)
             throws URISyntaxException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
